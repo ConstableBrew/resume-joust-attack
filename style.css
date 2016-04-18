@@ -1,0 +1,48 @@
+* {
+	box-sizing: border-box;
+}
+
+
+body {
+	background: #111;
+	color: #aaa;
+}
+
+b {
+	color: #eee;
+}
+
+#canvas,
+#arena {
+	display: block;
+	height: 100%;
+	left: 0;
+	max-height: 100%;
+	max-width: 100%;
+	overflow: hidden;
+	position: absolute;
+	top: 0px;
+	width: 100%;
+}
+#arena {
+	padding: 0em 2em;
+}
+::-webkit-scrollbar {
+	display: none;
+}
+.sky {
+	height: calc(100% - 48px);
+}
+.ground {
+	background-color: red;
+	display: inline-block;
+	height: 24px;
+	left: -2em;
+	position: relative;
+	width: calc(100% + 4em);
+}
+.instructions {
+	font-size: 10pt;
+	margin: 1em auto;
+	width: 640px;
+}
