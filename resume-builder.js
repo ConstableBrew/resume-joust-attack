@@ -66,7 +66,6 @@
 	var skyHeight= arena.scrollHeight;
 	var landWidth= arena.clientWidth;
 	var player   = {};
-	var keysDown = 0;
 	var pause    = false;
 
 
@@ -206,22 +205,31 @@
 		switch (key){
 			case UP:
 			case ENTER:
-				keysDown = isDown;
-				if (!isDown) return;
+				if (!isDown) {
+					player.lastImpulse = null;
+					return;
+				}
 				player.jumpflap = true;
 				event.preventDefault();
 				return false;
 			case RIGHT:
-				if (!isDown) return;
+				if (!isDown) {
+					player.lastImpulse = null;
+					return;
+				}
 				player.goRight = true;
 				event.preventDefault();
 				return false;
 			case LEFT:
-				if (!isDown) return;
+				if (!isDown) {
+					player.lastImpulse = null;
+					return;
+				}
 				player.goLeft = true;
 				event.preventDefault();
 				return false;
 			case SPACE:
+				if (!isDown) return;
 				addChunk();
 				event.preventDefault();
 				return false;
@@ -270,10 +278,12 @@
 		if (entity.jumpflap) {
 			entity.ddy -= entity.airborne ? entity.flapImpulse : entity.jumpImpulse;
 			entity.jumpflap = false;
+			entity.lastImpulse = window.performance.now();
 		}
 
 		if (entity.goRight) {
 			entity.goRight = false;
+			entity.lastImpulse = window.performance.now();
 			if (entity.airborne) {
 				entity.ddx += entity.glideImpulse;
 			} else if (entity.dx < entity.walkmaxdx) {
@@ -281,12 +291,13 @@
 				entity.dx = clamp(entity.dx + (dt * entity.walkImpulse), -entity.walkmaxdx, entity.walkmaxdx);
 				entity.ddx = 0;
 				entity.walkingVelocity = entity.dx;
-				entity.lastWalked = window.performance.now();
+				entity.lastWalked = entity.lastImpulse;
 			}
 		}
 		
 		if (entity.goLeft) {
 			entity.goLeft = false;
+			entity.lastImpulse = window.performance.now();
 			if (entity.airborne) {
 				entity.ddx -= entity.glideImpulse;
 			} else if (entity.dx > -entity.walkmaxdx) {
@@ -294,7 +305,7 @@
 				entity.dx = clamp(entity.dx + (dt * -entity.walkImpulse), -entity.walkmaxdx, entity.walkmaxdx);
 				entity.ddx = 0;
 				entity.walkingVelocity = entity.dx;
-				entity.lastWalked = window.performance.now();
+				entity.lastWalked = entity.lastImpulse;
 			}
 		}
 
@@ -364,12 +375,14 @@
 		if (entity.facingLeft) {
 			animFrame = 3 - animFrame;
 		}
+		console.log()
 		if (!entity.airborne && Math.abs(entity.dx) > entity.walkmaxdx) {
-			animFrame = 4;	
-		} else if (entity.airborne && keysDown) {
-			animFrame = 5;
+			animFrame = 4;	// Skidding
+		} else if (entity.airborne && (entity.lastImpulse && (window.performance.now() - entity.lastImpulse < 35))) {
+			animFrame = 5; // Winds down
 		} else if (entity.airborne) {
-			animFrame = 6;
+			entity.lastImpulse = null;
+			animFrame = 6; // Wings up
 		}
 		var sw = entity.sprite.sw[animFrame];
 		var sh = entity.sprite.sh[animFrame];
