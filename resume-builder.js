@@ -66,6 +66,7 @@
 	var skyHeight= arena.scrollHeight;
 	var landWidth= arena.clientWidth;
 	var player   = {};
+	var monsters = [];
 	var pause    = false;
 
 
@@ -155,7 +156,8 @@
 	}
 
 	function initGame(){
-		player = setupEntity({type: 'player', sprite: creatures[~~(Math.random() * creatures.length)]});
+		player = setupEntity({type: 'player', sprite: creatures[~~(Math.random() * 2)]});
+		monsters.push(setupEntity({type: 'monster', sprite: creatures[2], ai: randomMover}));
 		document.addEventListener('keydown',   function(event) { return handleInput(event, event.keyCode, true)}, false);
 		document.addEventListener('keyup',     function(event) { return handleInput(event, event.keyCode,false)}, false);
 		document.addEventListener('mousedown', function(event) { return handleInput(event, event.button,  true)}, false);
@@ -178,6 +180,7 @@
 		entity.isPlayer   = obj.type === 'player';
 		entity.isTreasure = obj.type === 'treasure';
 		entity.sprite     = obj.sprite;
+		entity.ai         = obj.ai ? obj.ai.bind(entity) : undefined;
 		entity.start      = { x: +obj.x || 0, y: +obj.y || 0 };
 		entity.gravity    = obj.options.gravity !== undefined ? obj.options.gravity : gravity;
 		entity.maxdx      = obj.options.maxdx   !== undefined ? obj.options.maxdx   : maxdx;
@@ -200,8 +203,6 @@
 
 
 	function handleInput(event, key, isDown) {
-
-		
 		switch (key){
 			case UP:
 			case ENTER:
@@ -265,10 +266,18 @@
 
 	function update(dt) {
 		updatePlayer(dt);
+		updateMonsters(dt);
 	}
 
 	function updatePlayer(dt) {
 		updateEntity(player, dt);
+	}
+
+	function updateMonsters(dt) {
+		monsters.forEach((monster)=>{
+			monster.ai();
+			updateEntity(monster, dt);
+		});
 	}
 
 	function updateEntity(entity, dt) {
@@ -349,6 +358,25 @@
 	}
 
 
+	function randomMover(){
+		var action = Math.random();
+		if (0 > (action -= 0.03)) {
+			// Accelerate in the current direction
+			if (!this.aiGoal) this.aiGoal = Math.random() < 0.5 ? LEFT : RIGHT;
+			if (this.aiGoal == LEFT) {
+				this.goLeft = true;
+			} else {
+				this.goRight = true;
+			}
+		} else if (0 > (action -= 0.03)) {
+			this.jumpflap = true;
+		} else if (0 > (action -= 0.005)) {
+			this.aiGoal = Math.random() < 0.5 ? LEFT : RIGHT;
+		} else {
+			// do nothing
+		}
+	}
+
 
 	//-------------------------------------------------------------------------
 	// RENDERING
@@ -358,6 +386,7 @@
 		scrollArena(player.y);
 		ctx.clearRect(0, 0, width, height);
 		renderPlayer(dt);
+		renderMonsters(dt);
 	}
 
 	function scrollArena(y){
@@ -367,6 +396,12 @@
 
 	function renderPlayer(dt){
 		renderCreature(player, dt);
+	}
+
+	function renderMonsters(dt) {
+		monsters.forEach((monster) => {
+			renderCreature(monster, dt);
+		});
 	}
 
 	function renderCreature(entity, dt) {
