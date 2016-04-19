@@ -184,6 +184,10 @@
 			if (node.nodeType == Node.ELEMENT_NODE)
 				drops.appendChild(node);
 		}
+
+		if (drops.firstChild) {
+			arenaSky.appendChild(drops.firstChild);
+		}
 	}
 
 	function initGame(){
