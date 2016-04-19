@@ -76,6 +76,9 @@
 	var pause    = false;
 	var godMode  = false;
 
+	var score    = 0;
+	var topScore = 0;
+
 
 	var dt = 0;
 	var now = window.performance.now();
@@ -512,7 +515,7 @@
 		if (p.death || !p.collisions) return; // Player is incorperal right now and cannot be touched
 
 		monsters.forEach((m) => {
-			if (m.death || !m.collisions) return;
+			if (m.death || !m.collisions || p.death || !p.collisions) return;
 			var collisionImpulse = overlap(p, m);
 			var loser;
 
@@ -529,6 +532,8 @@
 					addChunk(); // Rewards!
 					// kill monster
 					loser = m;
+					++score;
+					if (score > topScore) topScore = score;
 					// Create a new monster to replace the dead one.
 					setTimeout(initRandomMonster, 2000 + Math.random() * 2000);
 					if (monsterCount < 7) {
@@ -539,6 +544,7 @@
 				} else if (m.y <= p.y && ( (m.x < p.x && !m.facingLeft) || (m.x > p.x && m.facingLeft) )) {
 					// kill player
 					loser = p;
+					score = 0;
 				}
 
 				if (loser){
@@ -603,6 +609,7 @@
 		ctx.imageSmoothingEnabled = false;
 		renderPlayer(dt);
 		renderMonsters(dt);
+		renderScore();
 
 		// ctx.fillStyle = 'rgba(0,0,0,0.75)';
 		// ctx.fillRect(0, 0, 100, 500);
@@ -624,6 +631,15 @@
 		monsters.forEach((monster) => {
 			renderCreature(monster, dt);
 		});
+	}
+
+	function renderScore(){
+		ctx.fillStyle = '#a99';
+		ctx.font = '18px fantasy';
+		ctx.fillText('BEST',   10, 20);
+		ctx.fillText('SCORE',  10, 47);
+		ctx.fillText(topScore, 90, 20);
+		ctx.fillText(score   , 90, 47);
 	}
 
 	function renderCreature(entity, dt) {
