@@ -287,6 +287,14 @@
 		entity.x  = wrap (entity.x  + (dt * entity.dx), 0, landWidth);
 		entity.y  = clamp(entity.y  + (dt * entity.dy), 0, skyHeight);
 
+		// Adjust the facing of the entity.
+		// If the entity comes to a rest (dx == 0), the current facing will be retained
+		if (entity.dx < 0){
+			entity.facingLeft = true;
+		} else if (entity.dx > 0) {
+			entity.facingLeft = false;
+		}
+
 		// Collision Detection
 
 		if (entity.airborne && entity.y >= skyHeight) {
@@ -333,6 +341,9 @@
 	function renderPlayer(dt) {
 		var scale = 3;
 		var animFrame = ~~(player.x / (sprite1.w / 4)) % 4;
+		if (player.facingLeft) {
+			animFrame = 3 - animFrame;
+		}
 		if (!player.airborne && Math.abs(player.dx) > player.walkmaxdx) {
 			animFrame = 4;	
 		} else if (player.airborne && keysDown) {
@@ -358,10 +369,25 @@
 		ctx.font = '0.75em sans-serif';
 		ctx.fillText('x:' + ~~player.x + ', dx:' + ~~player.dx, 50, 20);
 
+		if (player.facingLeft) {
+			// Entity is moving to the left, so flip the sprite
+			ctx.save();
+			ctx.scale(-1,1);
+			x = x * -1 - w; // Canvas is now flipped, so we need to adjust the position of our entity
+		}
+
 		ctx.drawImage(sprite, sx, sy, sw, sh, x, y, w, h);
-		if (x + w > width) {
-			// Show wrap around smoothly
-			ctx.drawImage(sprite, sx, sy, sw, sh, x - width, y, w, h)
+		
+		// Show wrap around smoothly
+		if (!player.facingLeft && x + w > width) {
+			ctx.drawImage(sprite, sx, sy, sw, sh, x - width, y, w, h);
+		} else if (player.facingLeft && x - w < -width) {
+			ctx.drawImage(sprite, sx, sy, sw, sh, x + width, y, w, h)
+		}
+
+		if (player.facingLeft) {
+			// Return to normal after adjusting for entity moving left
+			ctx.restore();
 		}
 	}
 
