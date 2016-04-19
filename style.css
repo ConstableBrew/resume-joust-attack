@@ -4,13 +4,12 @@
 
 
 body {
-	background: #111;
+	background: #221111;
 	color: #aaa;
 }
 
-b {
-	color: #eee;
-}
+b, a { color: #eee; }
+
 
 #canvas,
 #arena {
@@ -27,6 +26,9 @@ b {
 #arena {
 	padding: 0em 2em;
 }
+#arena.mouse-scrolling {
+	overflow: visible;
+}
 ::-webkit-scrollbar {
 	display: none;
 }
@@ -40,9 +42,13 @@ b {
 	left: -2em;
 	position: relative;
 	width: calc(100% + 4em);
+	background-image: url('ground.png');
+	background-repeat: repeat-x;
 }
 .instructions {
 	font-size: 10pt;
 	margin: 1em auto;
 	width: 640px;
+	z-index: 1;
+	position: relative;
 }
