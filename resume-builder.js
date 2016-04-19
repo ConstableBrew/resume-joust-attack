@@ -26,15 +26,31 @@
 	const COMMA    = 188;
 	const PERIOD   = 190;
 
-	const sprite1 = {
+	const yellowBird = {
 		w: 19,
-		h: 21,
-		sy: [ 0, 0, 0, 0, 0,  0,  0],
+		h: 19,
+		sy: [ 1, 1, 1, 1, 0,  0,  0],
 		sx: [ 1,23,46,70,90,113,140],
 		sw: [19,19,19,19,19, 19, 19],
-		sh: [21,21,21,21,21, 21, 21]
-	}
-
+		sh: [19,19,19,19,19, 19, 19]
+	};
+	const blueBird = {
+		w: 19,
+		h: 19,
+		sy: [28,28,28,28,27, 28, 28],
+		sx: [ 1,23,46,70,90,113,140],
+		sw: [19,19,19,19,19, 19, 19],
+		sh: [19,19,19,19,19, 19, 19]
+	};
+	const greenBird = {
+		w: 19,
+		h: 19,
+		sy: [50,50,50,49,48, 50, 50],
+		sx: [ 0,23,46,69,90,113,140],
+		sw: [19,19,19,19,19, 19, 19],
+		sh: [19,19,19,19,19, 19, 19]
+	};
+	const creatures = [yellowBird, blueBird, greenBird];
 
 
 	var link = document.getElementById('resume-content');
@@ -140,7 +156,7 @@
 	}
 
 	function initGame(){
-		player = setupEntity({type: 'player', sprite: 0});
+		player = setupEntity({type: 'player', sprite: creatures[~~(Math.random() * creatures.length)]});
 		document.addEventListener('keydown',   function(event) { return handleInput(event, event.keyCode, true)}, false);
 		document.addEventListener('keyup',     function(event) { return handleInput(event, event.keyCode,false)}, false);
 		document.addEventListener('mousedown', function(event) { return handleInput(event, event.button,  true)}, false);
@@ -338,38 +354,42 @@
 		arena.scrollTop = y - arena.clientHeight;
 	}
 
-	function renderPlayer(dt) {
+	function renderPlayer(dt){
+		renderCreature(player, dt);
+	}
+
+	function renderCreature(entity, dt) {
 		var scale = 3;
-		var animFrame = ~~(player.x / (sprite1.w / 4)) % 4;
-		if (player.facingLeft) {
+		var animFrame = ~~(entity.x / (entity.sprite.w / 4)) % 4;
+		if (entity.facingLeft) {
 			animFrame = 3 - animFrame;
 		}
-		if (!player.airborne && Math.abs(player.dx) > player.walkmaxdx) {
+		if (!entity.airborne && Math.abs(entity.dx) > entity.walkmaxdx) {
 			animFrame = 4;	
-		} else if (player.airborne && keysDown) {
+		} else if (entity.airborne && keysDown) {
 			animFrame = 5;
-		} else if (player.airborne) {
+		} else if (entity.airborne) {
 			animFrame = 6;
 		}
-		var sw = sprite1.sw[animFrame];
-		var sh = sprite1.sh[animFrame];
-		var sx = sprite1.sx[animFrame];
-		var sy = sprite1.sy[animFrame];
+		var sw = entity.sprite.sw[animFrame];
+		var sh = entity.sprite.sh[animFrame];
+		var sx = entity.sprite.sx[animFrame];
+		var sy = entity.sprite.sy[animFrame];
 		var w = sw * scale;
 		var h = sh * scale;
 		
-		var t = player.y / skyHeight;
+		var t = entity.y / skyHeight;
 		var b = 0;
 		var c = height - scale * sh * 1.5;
 		var d = 1;
-		var x = player.x;
+		var x = entity.x;
 		var y = Math.linearTween(t, b, c, d);
 
 		ctx.fillStyle = 'gold';
 		ctx.font = '0.75em sans-serif';
-		ctx.fillText('x:' + ~~player.x + ', dx:' + ~~player.dx, 50, 20);
+		ctx.fillText('x:' + ~~entity.x + ', dx:' + ~~entity.dx, 50, 20);
 
-		if (player.facingLeft) {
+		if (entity.facingLeft) {
 			// Entity is moving to the left, so flip the sprite
 			ctx.save();
 			ctx.scale(-1,1);
@@ -379,13 +399,13 @@
 		ctx.drawImage(sprite, sx, sy, sw, sh, x, y, w, h);
 		
 		// Show wrap around smoothly
-		if (!player.facingLeft && x + w > width) {
+		if (!entity.facingLeft && x + w > width) {
 			ctx.drawImage(sprite, sx, sy, sw, sh, x - width, y, w, h);
-		} else if (player.facingLeft && x - w < -width) {
+		} else if (entity.facingLeft && x - w < -width) {
 			ctx.drawImage(sprite, sx, sy, sw, sh, x + width, y, w, h)
 		}
 
-		if (player.facingLeft) {
+		if (entity.facingLeft) {
 			// Return to normal after adjusting for entity moving left
 			ctx.restore();
 		}
