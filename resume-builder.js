@@ -170,6 +170,7 @@
 				setTimeout(resolve,0);
 			} else {
 				// not loaded yet, listen for load event
+				link.onload = resolve;
 				link.addEventListener('load', resolve);
 			}	
 		});
