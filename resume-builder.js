@@ -179,7 +179,6 @@
 		// We pull out all of the tags (ignoring raw text nodes) from the resume
 		// and stick those into our drops. The drops then are placed into the
 		// arena at a time as needed
-debugger;
 		var resume = document.createElement('div');
 		resume.innerHTML = xhr.currentTarget.response;
 		
