@@ -163,7 +163,7 @@
 
 	function waitForContent(){
 		// Wait for content to be retreived by the browser
-		return new Promise((resolve, reject) => {
+		return new Promise(function (resolve, reject){
 			spritesheet.src = 'spritesheet.png'; // Should wait for this too... TODO
 			if (link.import) {
 				// content already loaded
@@ -414,7 +414,7 @@
 	}
 
 	function updateMonsters(dt) {
-		monsters.forEach((monster)=>{
+		monsters.forEach(function (monster){
 			monster.ai();
 			updateEntity(monster, dt);
 		});
@@ -514,7 +514,7 @@
 		var p = player;
 		if (p.death || !p.collisions) return; // Player is incorperal right now and cannot be touched
 
-		monsters.forEach((m) => {
+		monsters.forEach(function (m){
 			if (m.death || !m.collisions || p.death || !p.collisions) return;
 			var collisionImpulse = overlap(p, m);
 			var loser;
@@ -628,7 +628,7 @@
 	}
 
 	function renderMonsters(dt) {
-		monsters.forEach((monster) => {
+		monsters.forEach(function (monster){
 			renderCreature(monster, dt);
 		});
 	}
