@@ -13,6 +13,7 @@
 	var walkmaxdx    = gravity;
 	var maxdx   = gravity * 5;
 	var maxdy   = gravity * 10;
+	var groundHeight = 35;
 
 
 	var ENTER    = 13;
@@ -28,6 +29,7 @@
 	var KEY_P    = 80;
 	var KEY_S    = 83;
 	var KEY_W    = 87;
+	var KEY_X    = 88;
 	var COMMA    = 188;
 	var PERIOD   = 190;
 
@@ -69,12 +71,13 @@
 	var ctx      = canvas.getContext('2d');
 	var width    = canvas.width  = window.innerWidth;
 	var height   = canvas.height = window.innerHeight;
-	var skyHeight= arena.scrollHeight;
+	var skyHeight= arena.scrollHeight - groundHeight;
 	var landWidth= arena.clientWidth;
 	var player   = {};
 	var monsters = [];
 	var pause    = false;
 	var godMode  = false;
+	var debug    = false;
 
 	var score    = 0;
 	var topScore = 0;
@@ -194,12 +197,6 @@ debugger;
 	function initGame(){
 		initPlayer();
 		initRandomMonster();
-		// initDebugMonster(100);
-		// initDebugMonster(200);
-		// initDebugMonster(400);
-		// initDebugMonster(800);
-		// initDebugMonster(1000);
-		// initDebugMonster();
 		document.addEventListener('keydown',   function(event) { return handleInput(event, event.keyCode, true)}, false);
 		document.addEventListener('keyup',     function(event) { return handleInput(event, event.keyCode,false)}, false);
 		document.addEventListener('touchstart',function(event) { return handleInput(event, UP,  true)}, false);
@@ -387,6 +384,23 @@ debugger;
 				player.x++;
 				event.preventDefault();
 				return false;
+			case KEY_X:
+				if (!isDown) return;
+				debug = !debug;
+				if (debug){
+					monsters = [];
+					initDebugMonster();
+					initDebugMonster(100);
+					initDebugMonster(200);
+					initDebugMonster(400);
+					initDebugMonster(800);
+					initDebugMonster(1000);
+				} else {
+					monsters = [];
+					initRandomMonster();
+				}
+				event.preventDefault();
+				return false;
 			default:
 				console.log('Key:', key, 'isDown:', isDown);
 		}
@@ -396,7 +410,7 @@ debugger;
 		if (drops.firstChild) {
 			var oldSkyHeight = skyHeight;
 			arena.insertBefore(drops.firstChild, arenaGround);
-			skyHeight = arena.scrollHeight;
+			skyHeight = arena.scrollHeight - groundHeight;
 		}
 	}
 
@@ -534,7 +548,7 @@ debugger;
 					if (score > topScore) topScore = score;
 					// Create a new monster to replace the dead one.
 					setTimeout(initRandomMonster, 2000 + Math.random() * 2000);
-					if (monsterCount < 7) {
+					if (monsterCount < 6) {
 						// Add an aditional monster!
 						++monsterCount;
 						setTimeout(initRandomMonster, 3000 + Math.random() * 3000);
@@ -572,7 +586,7 @@ debugger;
 
 	function randomMover(){
 		var action = Math.random();
-		if (0 > (action -= 0.03)) {
+		if (0 > (action -= 0.02)) {
 			// Accelerate in the current direction
 			if (!this.aiGoal) this.aiGoal = Math.random() < 0.5 ? LEFT : RIGHT;
 			if (this.aiGoal == LEFT) {
@@ -580,7 +594,7 @@ debugger;
 			} else {
 				this.goRight = true;
 			}
-		} else if (0 > (action -= 0.03)) {
+		} else if (0 > (action -= 0.04)) {
 			// Fly higher
 			this.jumpflap = true;
 		} else if (0 > (action -= 0.005)) {
@@ -609,15 +623,17 @@ debugger;
 		renderMonsters(dt);
 		renderScore();
 
-		// ctx.fillStyle = 'rgba(0,0,0,0.75)';
-		// ctx.fillRect(0, 0, 100, 500);
-		// ctx.fillStyle = 'gold';
-		// ctx.font = '10px sans-serif';
-		// ctx.fillText('x:' + ~~player.x + ', dx:' + ~~player.dx, 10, 15);
-		// ctx.fillText('y:' + ~~player.y + ', dy:' + ~~player.dy, 10, 30);
-		// ctx.fillText(player.airborne ? 'airborne' : 'grounded', 10, 45);
-		// ctx.fillText('scroll top:' + arena.scrollTop,           10, 60);
-		// ctx.fillText('scroll height:' + arena.scrollHeight,     10, 75);
+		if (debug) {
+			ctx.fillStyle = 'rgba(0,0,0,0.75)';
+			ctx.fillRect(75, 10, 100, 500);
+			ctx.fillStyle = 'gold';
+			ctx.font = '10px sans-serif';
+			ctx.fillText('x:' + ~~player.x + ', dx:' + ~~player.dx, 10, 80);
+			ctx.fillText('y:' + ~~player.y + ', dy:' + ~~player.dy, 10, 95);
+			ctx.fillText(player.airborne ? 'airborne' : 'grounded', 10, 110);
+			ctx.fillText('scroll top:' + arena.scrollTop,           10, 125);
+			ctx.fillText('scroll height:' + arena.scrollHeight,     10, 140);
+		}
 	}
 
 
@@ -668,12 +684,12 @@ debugger;
 		if (entity.isPlayer) {
 			var t = (player.y - h/2) / (skyHeight - h);
 			var b = 0;
-			var c = height - h - 24;
+			var c = height - h - groundHeight;
 			var d = 1;
 			var y = Math.linearTween(t, b, c, d);
 			scrollArena(y / c)
 		} else {
-			var y = entity.y - arena.scrollTop - h/2 - 24;
+			var y = entity.y - arena.scrollTop - h/2;
 		}
 		var x = entity.x - w/2;
 
