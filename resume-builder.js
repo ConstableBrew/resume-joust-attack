@@ -2,60 +2,60 @@
 
 !function(){
 	
-	const fps     = 60;
-	const step    = 1/fps;
-	const meter   = 24; // number of pixels per meter
-	const gravity = 9.8 * meter;// acceleration due to gravity, m/s
-	const jumpImpulse  = gravity/2 * fps;
-	const flapImpulse  = gravity/3 * fps;
-	const glideImpulse = gravity/3 * fps;
-	const walkImpulse  = gravity/4 * fps;
-	const walkmaxdx    = gravity;
-	const maxdx   = gravity * 5;
-	const maxdy   = gravity * 10;
+	var fps     = 60;
+	var step    = 1/fps;
+	var meter   = 24; // number of pixels per meter
+	var gravity = 9.8 * meter;// acceleration due to gravity, m/s
+	var jumpImpulse  = gravity/2 * fps;
+	var flapImpulse  = gravity/3 * fps;
+	var glideImpulse = gravity/3 * fps;
+	var walkImpulse  = gravity/4 * fps;
+	var walkmaxdx    = gravity;
+	var maxdx   = gravity * 5;
+	var maxdy   = gravity * 10;
 
 
-	const ENTER    = 13;
-	const ESC      = 27;
-	const SPACE    = 32;
-	const LEFT     = 37;
-	const UP       = 38;
-	const RIGHT    = 39;
-	const DOWN     = 40;
-	const KEY_A    = 65;
-	const KEY_D    = 68;
-	const KEY_G    = 71;
-	const KEY_P    = 80;
-	const KEY_S    = 83;
-	const KEY_W    = 87;
-	const COMMA    = 188;
-	const PERIOD   = 190;
+	var ENTER    = 13;
+	var ESC      = 27;
+	var SPACE    = 32;
+	var LEFT     = 37;
+	var UP       = 38;
+	var RIGHT    = 39;
+	var DOWN     = 40;
+	var KEY_A    = 65;
+	var KEY_D    = 68;
+	var KEY_G    = 71;
+	var KEY_P    = 80;
+	var KEY_S    = 83;
+	var KEY_W    = 87;
+	var COMMA    = 188;
+	var PERIOD   = 190;
 
-	const yellowBird = {
+	var yellowBird = {
 		sy: [ 1, 1, 1, 1, 0,  0,  0],
 		sx: [ 1,23,46,70,90,113,140],
 		sw: [19,19,19,19,19, 19, 19],
 		sh: [19,19,19,19,19, 19, 19] // or 13 for flying frames
 	};
-	const blueBird = {
+	var blueBird = {
 		sy: [28,28,28,28,27, 28, 28],
 		sx: [ 1,23,46,70,90,113,140],
 		sw: [19,19,19,19,19, 19, 19],
 		sh: [19,19,19,19,19, 19, 19]
 	};
-	const greenBird = {
+	var greenBird = {
 		sy: [50,50,50,49,48, 50, 50],
 		sx: [ 0,23,46,69,90,113,140],
 		sw: [19,19,19,19,19, 19, 19],
 		sh: [19,19,19,19,19, 19, 19]
 	};
-	const burst = {
+	var burst = {
 		sy: [ 90, 90],
 		sx: [111,129],
 		sw: [ 11, 11],
 		sh: [ 11, 11]
 	}
-	const creatures = [yellowBird, blueBird, greenBird];
+	var creatures = [yellowBird, blueBird, greenBird];
 
 
 	var link     = document.getElementById('resume-content');
