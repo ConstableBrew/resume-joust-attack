@@ -165,23 +165,20 @@
 		// Wait for content to be retreived by the browser
 		return new Promise(function (resolve, reject){
 			spritesheet.src = 'spritesheet.png'; // Should wait for this too... TODO
-			if (link.import) {
-				// content already loaded
-				setTimeout(resolve,0);
-			} else {
-				// not loaded yet, listen for load event
-				link.onload = resolve;
-				link.addEventListener('load', resolve);
-			}	
+			var req = new XMLHttpRequest();
+			req.addEventListener('load', resolve);
+			req.open('GET', '/resume.html');
+			req.send();
 		});
 	}
 
-	function loadContent(){
+	function loadContent(xhr){
 		// We pull out all of the tags (ignoring raw text nodes) from the resume
 		// and stick those into our drops. The drops then are placed into the
 		// arena at a time as needed
-
-		var resume = link.import.querySelector('body');
+debugger;
+		var resume = document.createElement('div');
+		resume.innerHTML = xhr.currentTarget.response;
 		
 		while (resume.firstChild){
 			var node = resume.removeChild(resume.firstChild);
