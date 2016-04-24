@@ -33,11 +33,17 @@
 	var COMMA    = 188;
 	var PERIOD   = 190;
 
+	var riders = {
+		sy: [74,74,74,75, 76],
+		sx: [ 6,30,54,93,130],
+		sw: [12,12,12,12, 12],
+		sh: [ 7, 7, 7, 7,  7]
+	}
 	var yellowBird = {
 		sy: [ 1, 1, 1, 1, 0,  0,  0],
 		sx: [ 1,23,46,70,90,113,140],
 		sw: [19,19,19,19,19, 19, 19],
-		sh: [19,19,19,19,19, 19, 19] // or 13 for flying frames
+		sh: [19,19,19,19,19, 19, 19]
 	};
 	var blueBird = {
 		sy: [28,28,28,28,27, 28, 28],
@@ -215,6 +221,9 @@
 			y: skyHeight * 0.8,
 			w: 60,
 			h: 60,
+			rider: ~~(Math.random() * riders.length),
+			riderw: 38,
+			riderh: 22,
 			collisions: false
 		});
 	}
@@ -229,6 +238,9 @@
 			debug: y,
 			w: 60,
 			h: 60,
+			rider: ~~(Math.random() * riders.length),
+			riderw: 38,
+			riderh: 22,
 			gravity: 0,
 			collisions: false
 		});
@@ -245,6 +257,9 @@
 			y: skyHeight * 0.2 * (Math.random() + 1),
 			w: 60,
 			h: 60,
+			rider: ~~(Math.random() * riders.length),
+			riderw: 38,
+			riderh: 22,
 			maxdx: maxdx * 0.8,
 			collisions: true
 		});
@@ -261,6 +276,9 @@
 		entity.dy         = +obj.dy || 0;
 		entity.w          = +obj.w || 0;
 		entity.h          = +obj.h || 0;
+		entity.rider      = +obj.rider || 0;
+		entity.riderw     = +obj.riderw || 0;
+		entity.riderh     = +obj.riderh || 0;
 		entity.isMonster  = obj.type === 'monster';
 		entity.isPlayer   = obj.type === 'player';
 		entity.isTreasure = obj.type === 'treasure';
@@ -585,7 +603,7 @@
 
 	function randomMover(){
 		var action = Math.random();
-		if (0 > (action -= 0.02)) {
+		if (0 > (action -= 0.018)) {
 			// Accelerate in the current direction
 			if (!this.aiGoal) this.aiGoal = Math.random() < 0.5 ? LEFT : RIGHT;
 			if (this.aiGoal == LEFT) {
@@ -658,14 +676,16 @@
 	function renderCreature(entity, dt) {
 		var sprite = entity.sprite;
 		var animFrame = ~~(entity.x / (sprite.sw[0] / 4)) % 4;
+		var rider = ~~entity.rider;
 		
 		if (entity.death) {
 			animFrame = ~~((now - entity.death) / 50) % 2;
+			rider = null;
 			sprite = burst;
 		} else if (!entity.airborne && Math.abs(entity.dx) > entity.walkmaxdx) {
 			animFrame = 4;	// Skidding
 		} else if (entity.airborne && (entity.lastImpulse && (now - entity.lastImpulse < 35))) {
-			animFrame = 5; // Winds down
+			animFrame = 5; // Wings down
 		} else if (entity.airborne) {
 			entity.lastImpulse = null;
 			animFrame = 6; // Wings up
@@ -679,6 +699,12 @@
 		var sy = sprite.sy[animFrame];
 		var w = entity.w;
 		var h = entity.h;
+		var ridersw = riders.sw[rider];
+		var ridersh = riders.sh[rider];
+		var ridersx = riders.sx[rider];
+		var ridersy = riders.sy[rider];
+		var riderw  = entity.riderw;
+		var riderh  = entity.riderh;
 		
 		if (entity.isPlayer) {
 			var t = (player.y - h/2) / (skyHeight - h);
@@ -693,18 +719,30 @@
 		var x = entity.x - w/2;
 
 		if (entity.facingLeft) {
-			// Entity is moving to the left, so flip the sprite
+			// Entity is moving to the left, so draw the bird on top of the rider (so the lance looks like it is behind)
 			ctx.save();
 			ctx.scale(-1,1);
 			x = x * -1 - w; // Canvas is now flipped, so we need to adjust the position of our entity
+			if (rider !== null)
+				ctx.drawImage(spritesheet, ridersx, ridersy, ridersw, ridersh, x + riderw/2, y+5, riderw, riderh);
+			ctx.drawImage(spritesheet, sx, sy, sw, sh, x, y, w, h);
+		} else {
+			// Entity is moving to the right, so draw the rider on top of the bird
+			ctx.drawImage(spritesheet, sx, sy, sw, sh, x, y, w, h);
+			if (rider !== null)
+				ctx.drawImage(spritesheet, ridersx, ridersy, ridersw, ridersh, x + riderw/2, y+5, riderw, riderh);
 		}
 
-		ctx.drawImage(spritesheet, sx, sy, sw, sh, x, y, w, h);
+
 		
 		// Show wrap around smoothly
 		if (!entity.facingLeft && x + w > width) {
 			ctx.drawImage(spritesheet, sx, sy, sw, sh, x - width, y, w, h);
+			if (rider !== null)
+				ctx.drawImage(spritesheet, ridersx, ridersy, ridersw, ridersh, x - width + riderw/2, y+5, riderw, riderh);
 		} else if (entity.facingLeft && x - w < -width) {
+			if (rider !== null)
+				ctx.drawImage(spritesheet, ridersx, ridersy, ridersw, ridersh, x + width + riderw/2, y+5, riderw, riderh);
 			ctx.drawImage(spritesheet, sx, sy, sw, sh, x + width, y, w, h)
 		}
 
